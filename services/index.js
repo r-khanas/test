@@ -1,16 +1,22 @@
 var mongoose = require("mongoose");
 var Schema = mongoose.Schema;
 
-const convertJson = (jsonSchema) => {
+const convertJson = (jsonSchema, mongooseSchema) => {
   if (jsonSchema.type === "object") {
+    let newSchema = {};
     Object.entries(jsonSchema.properties).forEach(([key, value]) => {
-      convertJson(value);
+      console.log("KEY", key, "VALUE", value);
+      if (value.type === "object") {
+        Object.assign(newSchema, { [key]: convertJson(value, newSchema) });
+      } else {
+        Object.assign(newSchema, { [key]: value });
+      }
     });
-  } else if (jsonSchema.type === "array") {
-    console.log(jsonSchema.items);
+    Object.assign(mongooseSchema, newSchema);
   } else {
-    console.log(jsonSchema);
+    Object.assign(mongooseSchema, jsonSchema);
   }
+  return mongooseSchema;
 };
 
 module.exports = { convertJson };
