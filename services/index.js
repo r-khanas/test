@@ -3,36 +3,37 @@ var Schema = mongoose.Schema;
 
 const convertToMongooseSchema = (jsonSchema) => {
   switch (jsonSchema.type) {
-    // case "string":
-    // case "number":
-    // case "integer":
-    // case "boolean":
-    // case "null":
-    //   return new Schema(convertValue(jsonSchema));
     case "object":
       return convertObject(jsonSchema);
   }
 };
 
+const checkIfRequired = (value, required) => {
+  return { ...value, ...(required && { required }) };
+};
+
 const convertObject = (jsonSchema) => {
   const mongooseObject = {};
 
+  const requiredProperties = jsonSchema.required || [];
+
   Object.entries(jsonSchema.properties).forEach(([key, value]) => {
-    mongooseObject[key] = convertValue(value);
+    const isRequired = requiredProperties.includes(key);
+    mongooseObject[key] = convertValue(value, isRequired);
   });
 
   return new Schema(mongooseObject);
 };
 
-const convertValue = (jsonSchemaValue) => {
+const convertValue = (jsonSchemaValue, isRequired) => {
   switch (jsonSchemaValue.type) {
     case "string":
-      return { type: String };
+      return checkIfRequired({ type: String }, isRequired);
     case "number":
     case "integer":
-      return { type: Number };
+      return checkIfRequired({ type: Number }, isRequired);
     case "boolean":
-      return { type: Boolean };
+      return checkIfRequired({ type: Boolean }, isRequired);
     case "null":
       return null;
     case "object":
