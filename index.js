@@ -1,6 +1,6 @@
 const config = require("./config");
 const fs = require("fs");
-const { convertJson } = require("./services");
+const { convertToMongooseSchema } = require("./services");
 
 const path = config.jsonSchema;
 
@@ -8,8 +8,7 @@ fs.readFile(path, { encoding: "utf-8" }, (err, data) => {
   if (err) {
     console.error(err);
   }
-  const mongooseSchema = {};
-  const result = convertJson(JSON.parse(data), mongooseSchema);
+  const result = convertToMongooseSchema(JSON.parse(data));
   console.log(result);
   fs.writeFile(config.mongooseSchema, result, (err) => {
     if (err) {
