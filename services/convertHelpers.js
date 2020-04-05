@@ -7,9 +7,15 @@ const {
 } = require("./validationHelpers");
 
 const convertToMongooseSchema = (jsonSchema) => {
-  switch (jsonSchema.type) {
-    case "object":
-      return convertObject(jsonSchema);
+  try {
+    switch (jsonSchema.type) {
+      case "object":
+        return convertObject(jsonSchema);
+      default:
+        throw new Error("Invalid JSON Schema");
+    }
+  } catch (err) {
+    console.log(err);
   }
 };
 

@@ -8,12 +8,11 @@ fs.readFile(path, { encoding: "utf-8" }, (err, data) => {
   if (err) {
     console.error(err);
   }
-  const result = convertToMongooseSchema(JSON.parse(data));
-  console.log(result);
-  fs.writeFile(config.mongooseSchema, result, (err) => {
+  const resultSchema = convertToMongooseSchema(JSON.parse(data));
+
+  fs.writeFile(config.mongooseSchema, JSON.stringify(resultSchema), (err) => {
     if (err) {
       console.error(err);
     }
-    // console.log("Successfully written", mongooseSchema);
   });
 });
