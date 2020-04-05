@@ -10,7 +10,9 @@ const convertToMongooseSchema = (jsonSchema) => {
   try {
     switch (jsonSchema.type) {
       case "object":
-        return convertObject(jsonSchema);
+        return `const ${jsonSchema.title || "schema"} = ${convertObject(
+          jsonSchema
+        )}`;
       default:
         throw new Error("Invalid JSON Schema");
     }
@@ -20,16 +22,18 @@ const convertToMongooseSchema = (jsonSchema) => {
 };
 
 const convertObject = (jsonSchema) => {
-  const mongooseObject = {};
+  let string = ``;
 
   const requiredProperties = jsonSchema.required || [];
+  // const lastPropertyIndex = Object.entries(jsonSchema.properties).length -1
 
-  Object.entries(jsonSchema.properties).forEach(([key, value]) => {
+  Object.entries(jsonSchema.properties).forEach(([key, value], index) => {
     const isRequired = requiredProperties.includes(key);
-    mongooseObject[key] = convertValue(value, isRequired);
+    string += `  ${key}: ${convertValue(value, isRequired)}`;
   });
-
-  return new Schema(mongooseObject);
+  return `new Schema({
+${string}}),
+`;
 };
 
 const convertValue = (jsonSchemaValue, isRequired) => {
@@ -40,13 +44,14 @@ const convertValue = (jsonSchemaValue, isRequired) => {
     case "integer":
       return validateNumber(jsonSchemaValue, isRequired);
     case "boolean":
-      return checkIfRequired({ type: Boolean }, isRequired);
+      return checkIfRequired(jsonSchemaValue);
     case "null":
       return null;
     case "object":
       return convertObject(jsonSchemaValue);
     case "array":
-      return [convertValue(jsonSchemaValue.items)];
+      return `[
+  ${convertValue(jsonSchemaValue.items)}],`;
   }
 };
 

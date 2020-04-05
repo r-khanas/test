@@ -10,7 +10,7 @@ fs.readFile(path, { encoding: "utf-8" }, (err, data) => {
   }
   const resultSchema = convertToMongooseSchema(JSON.parse(data));
 
-  fs.writeFile(config.mongooseSchema, JSON.stringify(resultSchema), (err) => {
+  fs.writeFile(config.mongooseSchema, resultSchema, (err) => {
     if (err) {
       console.error(err);
     }
