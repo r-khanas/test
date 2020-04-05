@@ -8,9 +8,25 @@ const convertToMongooseSchema = (jsonSchema) => {
   }
 };
 
-const checkIfRequired = (value, required) => {
-  return { ...value, ...(required && { required }) };
-};
+const checkIfRequired = (value, required) => ({
+  ...value,
+  ...(required && { required }),
+});
+
+const validateString = ({ minLength, maxLength, pattern }, required) => ({
+  type: String,
+  ...(required && { required }),
+  ...(minLength && { minlength: minLength }),
+  ...(maxLength && { maxlength: maxLength }),
+  ...(pattern && { match: new RegExp(pattern) }),
+});
+
+const validateNumber = ({ minimum, maximum }, required) => ({
+  type: String,
+  ...(required && { required }),
+  ...(minimum && { min: minimum }),
+  ...(maximum && { max: maximum }),
+});
 
 const convertObject = (jsonSchema) => {
   const mongooseObject = {};
@@ -28,10 +44,10 @@ const convertObject = (jsonSchema) => {
 const convertValue = (jsonSchemaValue, isRequired) => {
   switch (jsonSchemaValue.type) {
     case "string":
-      return checkIfRequired({ type: String }, isRequired);
+      return validateString(jsonSchemaValue, isRequired);
     case "number":
     case "integer":
-      return checkIfRequired({ type: Number }, isRequired);
+      return validateNumber(jsonSchemaValue, isRequired);
     case "boolean":
       return checkIfRequired({ type: Boolean }, isRequired);
     case "null":
