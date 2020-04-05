@@ -58,13 +58,13 @@ const convertObject = (jsonSchema, ident = "") => {
   Object.entries(jsonSchema.properties).forEach(([key, value]) => {
     const isRequired = requiredProperties.includes(key);
     string += `
-${ident}${key}: ${convertValue(value, isRequired, ident)}`;
+${ident}${key}: ${convertValue(value, ident, isRequired)}`;
   });
   return `new Schema({${string}
 ${ident.slice(2)}}),`;
 };
 
-const convertValue = (jsonSchemaValue, isRequired, ident) => {
+const convertValue = (jsonSchemaValue, ident, isRequired) => {
   switch (jsonSchemaValue.type) {
     case "string":
       return convertString(jsonSchemaValue, isRequired, ident);
@@ -80,7 +80,7 @@ const convertValue = (jsonSchemaValue, isRequired, ident) => {
     case "array":
       ident += "  ";
       return `[
-    ${convertValue(jsonSchemaValue.items, undefined, ident)}
+    ${convertValue(jsonSchemaValue.items, ident)}
   ],`;
   }
 };
