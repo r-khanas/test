@@ -12,7 +12,7 @@ const validateString = ({ minLength, maxLength, pattern }, required) => ({
 });
 
 const validateNumber = ({ minimum, maximum }, required) => ({
-  type: String,
+  type: Number,
   ...(required && { required }),
   ...(minimum && { min: minimum }),
   ...(maximum && { max: maximum }),
