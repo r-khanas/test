@@ -22,7 +22,7 @@ const convertBoolean = (required) => ({
 });
 
 const convertToMongooseSchema = (jsonSchema) => {
-  if (jsonSchema.type !== "object") {
+  if (jsonSchema.type !== "object" || !jsonSchema.properties) {
     throw new Error("Unexpected JSON Schema");
   }
   return convertObject(jsonSchema);
