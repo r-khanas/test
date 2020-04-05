@@ -1,87 +1,82 @@
-const convertString = ({ minLength, maxLength, pattern }, required, ident) => {
-  let string = `${ident}type: String, `;
+const convertString = ({ minLength, maxLength, pattern }, required, indent) => {
+  let string = `${indent}type: String`;
   if (required) {
-    string += `required: true, `;
+    string += ` ,required: true`;
   }
   if (minLength !== undefined) {
-    string += `minlength: ${minLength}, `;
+    string += ` ,minlength: ${minLength}`;
   }
   if (maxLength !== undefined) {
-    string += `maxlength: ${maxLength}, `;
+    string += ` ,maxlength: ${maxLength}`;
   }
   if (pattern) {
-    string += `match: ${new RegExp(pattern)}, `;
+    string += ` ,match: ${new RegExp(pattern)}`;
   }
-  return `{
-  ${string}
-${ident}},`;
+  return `{\n  ${string}\n${indent}}`;
 };
 
-const convertNumber = ({ minimum, maximum }, required, ident) => {
-  let string = `${ident}type: Number, `;
+const convertNumber = ({ minimum, maximum }, required, indent) => {
+  let string = `${indent}type: Number`;
   if (required) {
-    string += `required: true, `;
+    string += ` ,required: true`;
   }
   if (minimum !== undefined) {
-    string += `min: ${minimum}, `;
+    string += ` ,min: ${minimum}`;
   }
   if (maximum !== undefined) {
-    string += `max: ${maximum}, `;
+    string += ` ,max: ${maximum}`;
   }
-  return `{
-  ${string}${ident}
-  },`;
+  return `{\n  ${string}\n${indent}}`;
 };
 
-const convertBoolean = (required, ident) => {
-  let string = `${ident}type: Boolean, `;
+const convertBoolean = (required, indent) => {
+  let string = `${indent}type: Boolean`;
   if (required) {
-    string += `required: true, `;
+    string += ` ,required: true`;
   }
-  return `{
-  ${string}${ident}
-  },`;
+  return `{\n  ${string}\n${indent}}`;
 };
 
 const convertToMongooseSchema = (jsonSchema) => {
   if (jsonSchema.type !== "object" || !jsonSchema.properties) {
     throw new Error("Unexpected JSON Schema");
   }
-  return `const ${jsonSchema.title || "schema"} = ${convertObject(jsonSchema)}`;
+  return `const ${jsonSchema.title || "schema"} = ${convertObject(
+    jsonSchema
+  )};`;
 };
 
-const convertObject = (jsonSchema, ident = "") => {
+const convertObject = (jsonSchema, indent = "") => {
   let string = ``;
   const requiredProperties = jsonSchema.required || [];
-  ident += "  ";
+  const deeperIndent = indent + "  ";
 
-  Object.entries(jsonSchema.properties).forEach(([key, value]) => {
+  Object.entries(jsonSchema.properties).forEach(([key, value], index) => {
     const isRequired = requiredProperties.includes(key);
-    string += `
-${ident}${key}: ${convertValue(value, ident, isRequired)}`;
+    string += `${index === 0 ? "" : ","}
+${deeperIndent}${key}: ${convertValue(value, deeperIndent, isRequired)}`;
   });
-  return `new Schema({${string}
-${ident.slice(2)}}),`;
+  return `new Schema({${string}\n${indent}})`;
 };
 
-const convertValue = (jsonSchemaValue, ident, isRequired) => {
+const convertValue = (jsonSchemaValue, indent, isRequired) => {
   switch (jsonSchemaValue.type) {
     case "string":
-      return convertString(jsonSchemaValue, isRequired, ident);
+      return convertString(jsonSchemaValue, isRequired, indent);
     case "number":
     case "integer":
-      return convertNumber(jsonSchemaValue, isRequired, ident);
+      return convertNumber(jsonSchemaValue, isRequired, indent);
     case "boolean":
-      return convertBoolean(isRequired, ident);
+      return convertBoolean(isRequired, indent);
     case "null":
       return null;
     case "object":
-      return convertObject(jsonSchemaValue, ident);
+      return convertObject(jsonSchemaValue, indent);
     case "array":
-      ident += "  ";
-      return `[
-    ${convertValue(jsonSchemaValue.items, ident)}
-  ],`;
+      return `[\n${indent + "  "}${convertValue(
+        jsonSchemaValue.items,
+        indent + "  "
+      )}\n${indent}]`;
   }
 };
 
