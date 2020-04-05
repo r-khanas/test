@@ -1,6 +1,6 @@
 const config = require("./config");
 const fs = require("fs");
-const { convertToMongooseSchema } = require("./services");
+const { convertToMongooseSchema } = require("./services/convertHelpers");
 
 const path = config.jsonSchema;
 

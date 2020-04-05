@@ -1,5 +1,10 @@
-var mongoose = require("mongoose");
-var Schema = mongoose.Schema;
+const mongoose = require("mongoose");
+const Schema = mongoose.Schema;
+const {
+  validateString,
+  validateNumber,
+  checkIfRequired,
+} = require("./validationHelpers");
 
 const convertToMongooseSchema = (jsonSchema) => {
   switch (jsonSchema.type) {
@@ -7,26 +12,6 @@ const convertToMongooseSchema = (jsonSchema) => {
       return convertObject(jsonSchema);
   }
 };
-
-const checkIfRequired = (value, required) => ({
-  ...value,
-  ...(required && { required }),
-});
-
-const validateString = ({ minLength, maxLength, pattern }, required) => ({
-  type: String,
-  ...(required && { required }),
-  ...(minLength && { minlength: minLength }),
-  ...(maxLength && { maxlength: maxLength }),
-  ...(pattern && { match: new RegExp(pattern) }),
-});
-
-const validateNumber = ({ minimum, maximum }, required) => ({
-  type: String,
-  ...(required && { required }),
-  ...(minimum && { min: minimum }),
-  ...(maximum && { max: maximum }),
-});
 
 const convertObject = (jsonSchema) => {
   const mongooseObject = {};
